@@ -52,8 +52,16 @@ namespace MineSweeper
 
         public void OpenCell(int i, int j)
         {
-            _opened[i, j] = true;
+            if (!_opened[i, j])
+            {
+                _opened[i, j] = true;
+                if (_board[i, j] == 0)
+                {
+                    OpenRound(i, j);
+                }
 
+                DrawBoard();
+            }
         }
 
         public void OpenRound(int i, int j)
@@ -62,10 +70,13 @@ namespace MineSweeper
             {
                 for (int jk = j - 1; jk <= j + 1; jk++)
                 {
-
-                    if (IsValid(ik, jk))
+                    if (IsValid(ik, jk) && !_opened[ik, jk])
                     {
                         _opened[ik, jk] = true;
+                        if (_board[ik, jk] == 0)
+                        {
+                            OpenRound(ik, jk);
+                        }
                     }
                 }
             }
@@ -79,15 +90,16 @@ namespace MineSweeper
 
         public void DrawBoard()
         {
+            Console.Clear();
             StringBuilder fullLine = new StringBuilder();
             StringBuilder partLine = new StringBuilder();
             StringBuilder numberLine = new StringBuilder();
 
             for (int i = 0; i < _height; i++)
             {
-                for (int j = 0; j < _width; j++) 
+                for (int j = 0; j < _width; j++)
                 {
-                    if(i == 0)
+                    if (i == 0)
                     {
                         fullLine.Append("#######");
                         partLine.Append("#     #");
@@ -106,7 +118,7 @@ namespace MineSweeper
 
         public string GetNumberCell(int i, int j)
         {
-            if(!_opened[i, j] || _board[i, j] < 1)
+            if (!_opened[i, j] || _board[i, j] < 1)
             {
                 return "#     #";
             }

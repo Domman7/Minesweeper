@@ -7,7 +7,14 @@ namespace MineSweeper
         static void Main(string[] args)
         {
             var test = new Game(8, 8, 10);
-            test.DrawBoard();
+            
+            while(true)
+            {
+                test.DrawBoard();
+                int i = int.Parse(Console.ReadLine());
+                int j = int.Parse(Console.ReadLine());
+                test.OpenCell(i, j);
+            }
         }
     }
 }
