@@ -9,16 +9,25 @@ namespace MineSweeper
         private int _height;
         private int _width;
         private int _minesNumber;
+        private bool _end;
         private int[,] _board;
         private bool[,] _opened;
+
+        private int _curI;
+        private int _curJ;
 
         public Game(int height, int width, int minesNumber)
         {
             _height = height;
             _width = width;
             _minesNumber = minesNumber;
+            _end = false;
             _board = new int[_height, _width];
             _opened = new bool[_height, _width];
+
+
+            _curI = 0;
+            _curJ = 0;
 
             Random rnd = new Random();
             for (int i = 0; i < _minesNumber; i++)
@@ -52,15 +61,43 @@ namespace MineSweeper
 
         public void OpenCell(int i, int j)
         {
-            if (!_opened[i, j])
+            if (_board[i, j] == -1)
             {
-                _opened[i, j] = true;
-                if (_board[i, j] == 0)
+                _end = true;
+            }
+            else
+            {
+                if (!_opened[i, j])
                 {
-                    OpenRound(i, j);
-                }
+                    _opened[i, j] = true;
+                    if (_board[i, j] == 0)
+                    {
+                        OpenRound(i, j);
+                    }
 
-                DrawBoard();
+                    DrawBoard();
+                }
+            }
+        }
+
+        public void OpenCell()
+        {
+            if (_board[_curI, _curJ] == -1)
+            {
+                _end = true;
+            }
+            else
+            {
+                if (!_opened[_curI, _curJ])
+                {
+                    _opened[_curI, _curJ] = true;
+                    if (_board[_curI, _curJ] == 0)
+                    {
+                        OpenRound(_curI, _curJ);
+                    }
+
+                    DrawBoard();
+                }
             }
         }
 
@@ -88,11 +125,17 @@ namespace MineSweeper
             return i >= 0 && j >= 0 && i < _height && j < _width;
         }
 
+        public bool CheckForEnd()
+        {
+            return _end;
+        }
+
         public void DrawBoard()
         {
             Console.Clear();
             StringBuilder fullLine = new StringBuilder();
             StringBuilder partLine = new StringBuilder();
+            StringBuilder curLine = new StringBuilder();
             StringBuilder numberLine = new StringBuilder();
 
             for (int i = 0; i < _height; i++)
@@ -101,29 +144,84 @@ namespace MineSweeper
                 {
                     if (i == 0)
                     {
-                        fullLine.Append("#######");
-                        partLine.Append("#     #");
+                        fullLine.Append("######");
+                        partLine.Append("#     ");
+                        if (j == _width - 1)
+                        {
+                            fullLine.Append("#");
+                            partLine.Append("#");
+                        }
+                    }
+
+                    if (_curI == i && _curJ == j)
+                    {
+                        curLine.Append("# ___ ");
+                    }
+                    else
+                    {
+                        curLine.Append("#     ");
                     }
 
                     numberLine.Append(GetNumberCell(i, j));
                 }
+
                 Console.WriteLine(fullLine);
                 Console.WriteLine(partLine);
-                Console.WriteLine(numberLine);
-                Console.WriteLine(partLine);
+                Console.WriteLine(numberLine.Append("#"));
+                Console.WriteLine(curLine.Append("#"));
                 numberLine.Clear();
+                curLine.Clear();
             }
             Console.WriteLine(fullLine);
         }
 
         public string GetNumberCell(int i, int j)
         {
-            if (!_opened[i, j] || _board[i, j] < 1)
+            if (!_opened[i, j] || _board[i, j] == -1)
             {
-                return "#     #";
+                return "#     ";
             }
 
-            return "#  " + _board[i, j] + "  #";
+            return "#  " + _board[i, j] + "  ";
+        }
+
+        public void MoveCur(ConsoleKey key)
+        {
+            switch (key)
+            {
+                case ConsoleKey.UpArrow:
+                    {
+                        if (IsValid(_curI - 1, _curJ))
+                        {
+                            _curI--;
+                        }
+                        break;
+                    }
+                case ConsoleKey.DownArrow:
+                    {
+                        if (IsValid(_curI + 1, _curJ))
+                        {
+                            _curI++;
+                        }
+                        break;
+                    }
+                case ConsoleKey.RightArrow:
+                    {
+                        if (IsValid(_curI, _curJ + 1))
+                        {
+                            _curJ++;
+                        }
+                        break;
+                    }
+                case ConsoleKey.LeftArrow:
+                    {
+                        if (IsValid(_curI, _curJ - 1))
+                        {
+                            _curJ--;
+                        }
+                        break;
+                    }
+            }
         }
 
         public void ShowBoard()
